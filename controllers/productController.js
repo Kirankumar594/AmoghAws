@@ -25,9 +25,9 @@ export const createProduct = async (req, res) => {
     const featuresArray = features ? JSON.parse(features) : [];
     const specsObject = specifications ? JSON.parse(specifications) : {};
 
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ message: "At least one image is required." });
-    }
+    // if (!req.files || req.files.length === 0) {
+    //   return res.status(400).json({ message: "At least one image is required." });
+    // }
 
     // Upload images to S3
     const imageUploads = await Promise.all(
