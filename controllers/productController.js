@@ -11,7 +11,7 @@ export const createProduct = async (req, res) => {
       category,
       model,
       sku,
-      price,
+     
       discount,
       stock,
       warranty,
@@ -52,7 +52,7 @@ export const createProduct = async (req, res) => {
       category,
       model,
       sku,
-      price: parseFloat(price),
+      
       discount: parseFloat(discount) || 0,
       stock: parseInt(stock),
       warranty,

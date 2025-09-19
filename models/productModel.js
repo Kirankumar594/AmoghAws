@@ -28,7 +28,7 @@ const medicalHardwareSchema = new mongoose.Schema(
     },
     price: {
       type: Number,
-      required: [true, "Price is required"],
+      required: [false, "Price is required"],
     },
     discount: {
       type: Number,
