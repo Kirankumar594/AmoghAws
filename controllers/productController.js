@@ -89,6 +89,25 @@ export const updateProduct = async (req, res) => {
     const { id } = req.params;
     const updates = { ...req.body };
 
+    // Convert numeric fields if they exist
+    if (updates.price !== undefined && updates.price !== "undefined") {
+      updates.price = Number(updates.price);
+    } else {
+      delete updates.price; // prevent "undefined" being cast to Number
+    }
+
+    if (updates.discount !== undefined && updates.discount !== "undefined") {
+      updates.discount = Number(updates.discount);
+    } else {
+      delete updates.discount;
+    }
+
+    if (updates.stock !== undefined && updates.stock !== "undefined") {
+      updates.stock = Number(updates.stock);
+    } else {
+      delete updates.stock;
+    }
+
     // Handle image replacement if new files are uploaded
     if (req.files && req.files.length > 0) {
       const newImages = await Promise.all(
@@ -109,9 +128,15 @@ export const updateProduct = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    res.status(200).json({ message: "Product updated", product: updatedProduct });
+    res.status(200).json({
+      message: "Product updated",
+      product: updatedProduct,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Failed to update product", error: error.message });
+    res.status(500).json({
+      message: "Failed to update product",
+      error: error.message,
+    });
   }
 };
 
