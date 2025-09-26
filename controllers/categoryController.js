@@ -80,9 +80,9 @@ export const deleteCategory = async (req, res) => {
     }
 
     // Delete image from S3 if exists
-    if (category.image) {
-      await deleteFile(category.image);
-    }
+    // if (category.image) {
+    //   await deleteFile(category.image);
+    
 
     res.status(200).json({ message: "Category deleted", category });
   } catch (err) {

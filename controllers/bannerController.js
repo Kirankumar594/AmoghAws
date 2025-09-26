@@ -77,9 +77,9 @@ export const deleteBanner = async (req, res) => {
     const banner = await Banner.findById(req.params.id);
     if (!banner) return res.status(404).json({ message: "Banner not found" });
 
-    if (banner.image) {
-      await deleteFile(banner.image);
-    }
+    // if (banner.image) {
+    //   await deleteFile(banner.image);
+    // }
 
     await banner.deleteOne();
     res.json({ message: "Banner deleted successfully" });

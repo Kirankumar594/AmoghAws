@@ -78,13 +78,13 @@ export const deleteLeader = async (req, res) => {
     const leader = await Leader.findById(req.params.id);
     if (!leader) return res.status(404).json({ error: "Leader not found" });
 
-    if (leader.image) {
-      try {
-        await deleteFile(leader.image); // Delete from S3
-      } catch (err) {
-        console.warn("Failed to delete image from S3:", err.message);
-      }
-    }
+    // if (leader.image) {
+    //   try {
+    //     await deleteFile(leader.image); // Delete from S3
+    //   } catch (err) {
+    //     console.warn("Failed to delete image from S3:", err.message);
+    //   }
+    // }
 
     await leader.deleteOne();
     res.json({ message: "Leader deleted" });

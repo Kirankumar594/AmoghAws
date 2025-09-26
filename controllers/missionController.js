@@ -83,9 +83,9 @@ export const deleteMission = async (req, res) => {
     if (!mission) return res.status(404).json({ error: "Mission not found" });
 
     // delete image from S3 if exists
-    if (mission.image) {
-      await deleteFile(mission.image);
-    }
+    // if (mission.image) {
+    //   await deleteFile(mission.image);
+    // }
 
     await mission.deleteOne();
     res.json({ message: "Mission deleted successfully" });

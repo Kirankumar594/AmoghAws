@@ -182,13 +182,13 @@ export const deleteUser = async (req, res) => {
       return res.status(400).json({ success: false, message: "Cannot delete admin accounts" });
     }
 
-    if (user.profileImage) {
-      try {
-        await deleteFile(user.profileImage);
-      } catch (err) {
-        console.error("Error deleting user image from S3:", err);
-      }
-    }
+    // if (user.profileImage) {
+    //   try {
+    //     await deleteFile(user.profileImage);
+    //   } catch (err) {
+    //     console.error("Error deleting user image from S3:", err);
+    //   }
+    // }
 
     await User.findByIdAndDelete(req.params.id);
 

@@ -78,9 +78,9 @@ export const deleteOffer = async (req, res) => {
     if (!offer) return res.status(404).json({ message: "Offer not found" });
 
     // Delete image from S3
-    if (offer.image) {
-      await deleteFile(offer.image);
-    }
+    // if (offer.image) {
+    //   await deleteFile(offer.image);
+    // }
 
     await offer.deleteOne();
     res.json({ message: "Offer deleted", offer });

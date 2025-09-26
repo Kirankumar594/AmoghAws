@@ -81,9 +81,9 @@ export const deleteTestimonial = async (req, res) => {
     const testimonial = await Testimonial.findById(req.params.id);
     if (!testimonial) return res.status(404).json({ message: "Not found" });
 
-    if (testimonial.image) {
-      await deleteFile(testimonial.image); // delete from S3
-    }
+    // if (testimonial.image) {
+    //   await deleteFile(testimonial.image); // delete from S3
+    // }
 
     await testimonial.deleteOne();
     res.json({ message: "Deleted", testimonial });

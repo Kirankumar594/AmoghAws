@@ -76,10 +76,10 @@ export const deleteCoreValue = async (req, res) => {
     const value = await CoreValue.findById(req.params.id);
     if (!value) return res.status(404).json({ error: "Not found" });
 
-    if (value.image) {
-      // delete from S3
-      await deleteFile(value.image);
-    }
+    // if (value.image) {
+    //   // delete from S3
+    //   await deleteFile(value.image);
+    // }
 
     await value.deleteOne();
     res.json({ message: "Deleted successfully" });
