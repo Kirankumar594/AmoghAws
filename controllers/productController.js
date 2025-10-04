@@ -338,7 +338,7 @@ export const updateProduct = async (req, res) => {
 // Keep other functions (getAllProducts, deleteProduct, getProductById) the same
 export const getAllProducts = async (req, res) => {
   try {
-    const products = await productModel.find().sort({ createdAt: -1 });
+    const products = await productModel.find().sort({ createdAt: 1 });
     res.status(200).json({
       total: products.length,
       products,

@@ -6,11 +6,14 @@ import {
   deleteApplication
 } from '../controllers/careerController.js';
 
-import { uploadResume } from '../middleware/resume.js';
+
+import multer from 'multer';
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 const router = express.Router();
 
-router.post('/', uploadResume.single('resume'), createApplication);
+router.post('/', upload.single('resume'), createApplication);
 router.get('/', getAllApplications);
 router.get('/:id', getApplicationById);
 router.delete('/:id', deleteApplication); // ✅ DELETE endpoint added
