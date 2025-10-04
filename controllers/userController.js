@@ -1,7 +1,207 @@
+// import jwt from "jsonwebtoken";
+// import bcrypt from "bcryptjs";
+// import User from "../models/userModel.js";
+// import { uploadFile2, deleteFile } from "../Utils/Aws.upload.js"; // ✅ AWS S3 utils
+
+// // Generate JWT Token
+// const generateToken = (id) => {
+//   return jwt.sign({ id }, process.env.JWT_SECRET, {
+//     expiresIn: process.env.JWT_EXPIRE || "30d",
+//   });
+// };
+
+// // @desc Register new user
+// export const register = async (req, res) => {
+//   try {
+//     const { name, email, password, role } = req.body;
+
+//     if (!name || !email || !password) {
+//       return res.status(400).json({ success: false, message: "Please include all fields" });
+//     }
+
+//     const userExists = await User.findOne({ email });
+//     if (userExists) {
+//       return res.status(400).json({ success: false, message: "User already exists" });
+//     }
+
+//     const user = await User.create({
+//       name,
+//       email,
+//       password,
+//       role: role || "user",
+//       profileImage: null,
+//     });
+
+//     res.status(201).json({
+//       success: true,
+//       token: generateToken(user._id),
+//       user,
+//     });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: error.message || "Server error" });
+//   }
+// };
+
+// // @desc Login user
+// export const login = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+
+//     const user = await User.findOne({ email }).select("+password");
+//     if (!user) return res.status(401).json({ success: false, message: "Invalid credentials" });
+
+//     const isMatch = await bcrypt.compare(password, user.password);
+//     if (!isMatch) return res.status(401).json({ success: false, message: "Invalid credentials" });
+
+//     res.status(200).json({
+//       success: true,
+//       token: generateToken(user._id),
+//       user,
+//     });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// };
+
+// // @desc Get current user
+// export const getMe = async (req, res) => {
+//   try {
+//     const user = await User.findById(req.user.id).select("-password");
+//     if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+//     res.status(200).json({ success: true, data: user });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// };
+
+// // @desc Get all users (Admin only)
+// export const getUsers = async (req, res) => {
+//   try {
+//     const users = await User.find().select("-password");
+//     res.status(200).json({ success: true, count: users.length, data: users });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// };
+
+// // @desc Get user by ID (Admin only)
+// export const getUserById = async (req, res) => {
+//   try {
+//     const user = await User.findById(req.params.id).select("-password");
+//     if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+//     res.status(200).json({ success: true, data: user });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// };
+
+// // @desc Update user profile (with S3 image upload)
+// export const updateUser = async (req, res) => {
+//   try {
+//     const { name, email, password } = req.body;
+//     const user = await User.findById(req.user.id);
+
+//     if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+//     if (!name || !email) {
+//       return res.status(400).json({ success: false, message: "Name and email are required" });
+//     }
+
+//     if (email !== user.email) {
+//       const emailExists = await User.findOne({ email });
+//       if (emailExists) return res.status(400).json({ success: false, message: "Email already exists" });
+//     }
+
+//     user.name = name.trim();
+//     user.email = email.trim().toLowerCase();
+
+//     if (password) user.password = password;
+
+//     // ✅ Handle profile image upload to S3
+//     if (req.file) {
+//       // Delete old image from S3 if exists
+//       if (user.profileImage) {
+//         try {
+//           await deleteFile(user.profileImage);
+//         } catch (err) {
+//           console.error("Error deleting old S3 image:", err);
+//         }
+//       }
+//       // Upload new one
+//       user.profileImage = await uploadFile2(req.file, "profileImages");
+//     }
+
+//     const updatedUser = await user.save();
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Profile updated successfully",
+//       data: updatedUser,
+//     });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: error.message || "Server error" });
+//   }
+// };
+
+// // @desc Upload user photo (separate endpoint)
+// export const uploadUserPhoto = async (req, res) => {
+//   try {
+//     const user = await User.findById(req.user.id);
+//     if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+//     if (!req.file) return res.status(400).json({ success: false, message: "Please upload a file" });
+
+//     // Delete old photo from S3
+//     if (user.profileImage) {
+//       try {
+//         await deleteFile(user.profileImage);
+//       } catch (err) {
+//         console.error("Error deleting old S3 image:", err);
+//       }
+//     }
+
+//     // Upload new one
+//     user.profileImage = await uploadFile2(req.file, "profileImages");
+//     await user.save();
+
+//     res.status(200).json({ success: true, data: user.profileImage });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// };
+
+// // @desc Delete user (with S3 image delete)
+// export const deleteUser = async (req, res) => {
+//   try {
+//     const user = await User.findById(req.params.id);
+//     if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+//     if (user.role === "admin") {
+//       return res.status(400).json({ success: false, message: "Cannot delete admin accounts" });
+//     }
+
+//     // if (user.profileImage) {
+//     //   try {
+//     //     await deleteFile(user.profileImage);
+//     //   } catch (err) {
+//     //     console.error("Error deleting user image from S3:", err);
+//     //   }
+//     // }
+
+//     await User.findByIdAndDelete(req.params.id);
+
+//     res.status(200).json({ success: true, message: "User deleted successfully" });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// };
+
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import User from "../models/userModel.js";
-import { uploadFile2, deleteFile } from "../Utils/Aws.upload.js"; // ✅ AWS S3 utils
+import { uploadFile2, deleteFile } from "../Utils/Aws.upload.js";
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -10,10 +210,10 @@ const generateToken = (id) => {
   });
 };
 
-// @desc Register new user
+// @desc Register new user (User registration only)
 export const register = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, message: "Please include all fields" });
@@ -24,39 +224,142 @@ export const register = async (req, res) => {
       return res.status(400).json({ success: false, message: "User already exists" });
     }
 
+    // User registration can only create user accounts
     const user = await User.create({
       name,
       email,
       password,
-      role: role || "user",
+      role: "user", // Force user role
       profileImage: null,
     });
 
     res.status(201).json({
       success: true,
+      message: "User registered successfully",
       token: generateToken(user._id),
-      user,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        profileImage: user.profileImage
+      },
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message || "Server error" });
   }
 };
 
-// @desc Login user
+// @desc Register new admin (Admin registration - public)
+export const registerAdmin = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ success: false, message: "Please include all fields" });
+    }
+
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ success: false, message: "User already exists" });
+    }
+
+    // Create admin account with automatic approval
+    const admin = await User.create({
+      name,
+      email,
+      password,
+      role: "admin",
+      profileImage: null,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Admin account created successfully",
+      token: generateToken(admin._id),
+      user: {
+        id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        role: admin.role,
+        profileImage: admin.profileImage
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message || "Server error" });
+  }
+};
+
+// @desc Login user (User login only)
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email }).select("+password");
-    if (!user) return res.status(401).json({ success: false, message: "Invalid credentials" });
+    // Only find users with role 'user'
+    const user = await User.findOne({ email, role: "user" }).select("+password");
+    if (!user) {
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
+
+    // Check if user account is active
+    if (!user.isActive) {
+      return res.status(401).json({ success: false, message: "Account deactivated" });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ success: false, message: "Invalid credentials" });
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
 
     res.status(200).json({
       success: true,
+      message: "User login successful",
       token: generateToken(user._id),
-      user,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        profileImage: user.profileImage
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// @desc Login admin (Admin login only)
+export const loginAdmin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Only find users with role 'admin'
+    const admin = await User.findOne({ email, role: "admin" }).select("+password");
+    if (!admin) {
+      return res.status(401).json({ success: false, message: "Invalid admin credentials" });
+    }
+
+    // Check if admin account is active
+    if (!admin.isActive) {
+      return res.status(401).json({ success: false, message: "Admin account deactivated" });
+    }
+
+    const isMatch = await bcrypt.compare(password, admin.password);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Admin login successful",
+      token: generateToken(admin._id),
+      user: {
+        id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        role: admin.role,
+        profileImage: admin.profileImage
+      },
     });
   } catch (error) {
     res.status(500).json({ success: false, message: "Server error" });
@@ -97,7 +400,7 @@ export const getUserById = async (req, res) => {
   }
 };
 
-// @desc Update user profile (with S3 image upload)
+// @desc Update user profile
 export const updateUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -119,9 +422,8 @@ export const updateUser = async (req, res) => {
 
     if (password) user.password = password;
 
-    // ✅ Handle profile image upload to S3
+    // Handle profile image upload to S3
     if (req.file) {
-      // Delete old image from S3 if exists
       if (user.profileImage) {
         try {
           await deleteFile(user.profileImage);
@@ -129,7 +431,6 @@ export const updateUser = async (req, res) => {
           console.error("Error deleting old S3 image:", err);
         }
       }
-      // Upload new one
       user.profileImage = await uploadFile2(req.file, "profileImages");
     }
 
@@ -145,7 +446,7 @@ export const updateUser = async (req, res) => {
   }
 };
 
-// @desc Upload user photo (separate endpoint)
+// @desc Upload user photo
 export const uploadUserPhoto = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -153,7 +454,6 @@ export const uploadUserPhoto = async (req, res) => {
 
     if (!req.file) return res.status(400).json({ success: false, message: "Please upload a file" });
 
-    // Delete old photo from S3
     if (user.profileImage) {
       try {
         await deleteFile(user.profileImage);
@@ -162,7 +462,6 @@ export const uploadUserPhoto = async (req, res) => {
       }
     }
 
-    // Upload new one
     user.profileImage = await uploadFile2(req.file, "profileImages");
     await user.save();
 
@@ -172,27 +471,39 @@ export const uploadUserPhoto = async (req, res) => {
   }
 };
 
-// @desc Delete user (with S3 image delete)
+// @desc Delete user (Admin only)
 export const deleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-    if (user.role === "admin") {
-      return res.status(400).json({ success: false, message: "Cannot delete admin accounts" });
+    // Prevent self-deletion
+    if (req.user.id === req.params.id) {
+      return res.status(400).json({ success: false, message: "Cannot delete your own account" });
     }
-
-    // if (user.profileImage) {
-    //   try {
-    //     await deleteFile(user.profileImage);
-    //   } catch (err) {
-    //     console.error("Error deleting user image from S3:", err);
-    //   }
-    // }
 
     await User.findByIdAndDelete(req.params.id);
 
     res.status(200).json({ success: true, message: "User deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// @desc Toggle user active status (Admin only)
+export const toggleUserStatus = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    user.isActive = !user.isActive;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: `User ${user.isActive ? 'activated' : 'deactivated'} successfully`,
+      data: user
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: "Server error" });
   }
