@@ -1,9 +1,11 @@
 import Career from '../models/careerModel.js';
+import { uploadFile2 } from '../Utils/Aws.upload.js';
+
 
 export const createApplication = async (req, res, next) => {
   try {
     const { name, email, coverLetter } = req.body;
-    const resume = req.file?.filename;
+    const resume = req.file ? await uploadFile2(req.file) : "";
 
     if (!name || !email || !resume) {
       return res.status(400).json({ message: 'Name, email, and resume are required' });
@@ -47,8 +49,7 @@ export const getApplicationById = async (req, res, next) => {
 // DELETE application by ID
 // controllers/careerController.js
 
-import fs from 'fs';
-import path from 'path';
+
 
 export const deleteApplication = async (req, res) => {
   try {
@@ -59,17 +60,12 @@ export const deleteApplication = async (req, res) => {
       return res.status(404).json({ message: 'Application not found' });
     }
 
-    // Optional: Delete resume file from disk
-    const resumePath = path.join('uploads', application.resume);
-    if (fs.existsSync(resumePath)) {
-      fs.unlinkSync(resumePath);  // 👈 This could be line 58
-    }
-
+    // No need to touch fs here
     await Career.findByIdAndDelete(id);
 
     res.status(200).json({ message: 'Application deleted successfully' });
   } catch (error) {
-    console.error(error);  // <-- log the real error
+    console.error(error);
     res.status(500).json({ message: 'Error deleting application', error });
   }
 };
